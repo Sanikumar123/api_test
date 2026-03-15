@@ -1,0 +1,205 @@
+{
+  "info": {
+    "_postman_id": "d68c9111-9da5-47d4-a4ce-17f06d64f43c",
+    "name": "LibraryCollections",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "32918040"
+  },
+  "item": [
+    {
+      "name": "AddBook",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
+              "//schema\r",
+              "const schema = {\r",
+              "  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\r",
+              "  \"type\": \"object\",\r",
+              "  \"properties\": {\r",
+              "    \"Msg\": {\r",
+              "      \"type\": \"string\"\r",
+              "    },\r",
+              "    \"ID\": {\r",
+              "      \"type\": \"string\"\r",
+              "    }\r",
+              "  },\r",
+              "  \"required\": [\"Msg\", \"ID\"],\r",
+              "  \"additionalProperties\": false\r",
+              "};\r",
+              "\r",
+              "var ID = pm.collectionVariables.get(\"isbn\")+pm.collectionVariables.get(\"isle\");\r",
+              "pm.test(\"VALIDATE req res value\", function () {\r",
+              "\r",
+              "pm.expect(jsonData.ID).to.eql(ID);\r",
+              "    \r",
+              "});\r",
+              "\r",
+              "pm.test(\"VALIDATE json schema\", function () {\r",
+              "\r",
+              "pm.response.to.have.jsonSchema(schema);\r",
+              "    \r",
+              "});\r",
+              "\r",
+              "pm.test(\"Set ID value from response\", function () {\r",
+              "\r",
+              "pm.collectionVariables.set(\"ID\", jsonData.ID);\r",
+              "\r",
+              "    \r",
+              "});\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const isle = Math.floor(Math.random()*101);\r",
+              "pm.collectionVariables.set(\"isle\", isle);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"{{name}}\",\r\n    \"isbn\": \"{{isbn}}\",\r\n    \"aisle\": \"{{isle}}\",\r\n    \"author\": \"{{author}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/Library/Addbook.php",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "Library",
+            "Addbook.php"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GETBOOK",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const jsonData = pm.response.json();\r",
+              "\r",
+              "\r",
+              "pm.test(\"validate isbn value\", function () {\r",
+              "\r",
+              "    pm.expect(jsonData[0]).to.have.property(\"isbn\",pm.collectionVariables.get(\"isbn\"));\r",
+              "\r",
+              "});\r",
+              "\r",
+              "pm.test(\"status message\", function () {\r",
+              "\r",
+              "    pm.response.to.be.ok;\r",
+              "});\r",
+              "\r",
+              "pm.test(\"validate header content-type \", function () {\r",
+              "\r",
+              "   pm.response.to.have.header(\"Content-Type\",\"application/json;charset=UTF-8\");\r",
+              "});\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://rahulshettyacademy.com/Library/GetBook.php?ID={{ID}}",
+          "protocol": "https",
+          "host": [
+            "rahulshettyacademy",
+            "com"
+          ],
+          "path": [
+            "Library",
+            "GetBook.php"
+          ],
+          "query": [
+            {
+              "key": "ID",
+              "value": "{{ID}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "ID",
+      "value": ""
+    },
+    {
+      "key": "isbn",
+      "value": ""
+    },
+    {
+      "key": "isle",
+      "value": ""
+    },
+    {
+      "key": "name",
+      "value": ""
+    },
+    {
+      "key": "author",
+      "value": ""
+    }
+  ]
+}
