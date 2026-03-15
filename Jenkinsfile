@@ -10,12 +10,22 @@ pipeline {
         string(
             name: 'SPECIFIC_COLLECTION',
             defaultValue: '',
-            description: 'Enter the collection file name (only if RUN_OPTION is Specific)'
+            description: 'Enter collection file name if RUN_OPTION is Specific'
         )
         choice(
             name: 'ENV',
             choices: ['QA', 'UAT', 'staging', 'prod'],
-            description: 'Select the Postman environment'
+            description: 'Select Postman environment'
+        )
+        string(
+            name: 'TEST_DATA_FILE',
+            defaultValue: '',
+            description: 'Optional: provide CSV file name from test_data folder'
+        )
+        string(
+            name: 'BRANCH_NAME',
+            defaultValue: 'master',
+            description: 'Git branch to build'
         )
     }
 
@@ -23,7 +33,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git url: 'https://github.com/Sanikumar123/api_test.git',
-                    branch: "${params.BRANCH_NAME ?: 'master'}"
+                    branch: "${params.BRANCH_NAME}"
             }
         }
 
@@ -38,20 +48,15 @@ pipeline {
                 script {
                     def envFile = "environments/${params.ENV}.postman_environment.json"
 
+                    def testDataArg = params.TEST_DATA_FILE ? params.TEST_DATA_FILE : ""
+
                     if (params.RUN_OPTION == 'All') {
-                        // Loop through all collections in the folder
-                        bat """
-                        for %%f in (collections\\*.postman_collection.json) do (
-                            newman run %%f -e ${envFile} -r cli,html --reporter-html-export reports\\%%~nf_report.html
-                        )
-                        """
+                        bat "scripts\\run_all.bat ${envFile} All \"\" ${testDataArg}"
                     } else if (params.RUN_OPTION == 'Specific') {
                         if (!params.SPECIFIC_COLLECTION) {
-                            error "SPECIFIC_COLLECTION parameter is empty. Please provide a collection name."
+                            error "SPECIFIC_COLLECTION is required for Specific option"
                         }
-                        bat """
-                        newman run collections\\${params.SPECIFIC_COLLECTION} -e ${envFile} -r cli,html --reporter-html-export reports\\${params.SPECIFIC_COLLECTION}_report.html
-                        """
+                        bat "scripts\\run_all.bat ${envFile} Specific ${params.SPECIFIC_COLLECTION} ${testDataArg}"
                     }
                 }
             }
@@ -65,7 +70,7 @@ pipeline {
                     keepAll: true,
                     reportDir: 'reports',
                     reportFiles: '*.html',
-                    reportName: 'API Test Reports'
+                    reportName: 'API Test Reports (HTMLExtra)'
                 ])
             }
         }

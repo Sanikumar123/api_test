@@ -1,9 +1,12 @@
 {
-  "name": "api-test-pipeline",
+  "name": "api_test_framework",
   "version": "1.0.0",
-  "description": "Dependencies for Jenkins API test pipeline",
-  "dependencies": {
-    "newman": "*",
-    "newman-reporter-html": "*"
+  "description": "Postman API automation framework with Newman and HTMLExtra reports",
+  "scripts": {
+    "test": "newman run collections/*.postman_collection.json -r cli,htmlextra --reporter-htmlextra-export reports/summary_report.html"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1",
+    "newman-reporter-htmlextra": "^1.28.0"
   }
 }
