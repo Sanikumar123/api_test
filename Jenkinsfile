@@ -1,7 +1,7 @@
 pipeline {
     agent any
 
-    // Add build parameter for Git branch selection
+    // Parameter to select Git branch at build time
     parameters {
         string(
             name: 'BRANCH_NAME',
@@ -13,20 +13,22 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Use the parameter value for Git checkout
-                git url: 'https://github.com/Sanikumar123/api_test.git', branch: "${params.BRANCH_NAME}"
+                // Pull the selected branch from Git
+                git url: 'https://github.com/Sanikumar123/api_test.git',
+                    branch: "${params.BRANCH_NAME}"
             }
         }
 
         stage('Run API Tests') {
             steps {
-                sh 'chmod +x scripts/run_all.sh'
-                sh './scripts/run_all.sh'
+                // Run the Windows batch script
+                bat 'scripts\\run_all.bat'
             }
         }
 
         stage('Publish HTML Reports') {
             steps {
+                // Publish all Newman HTML reports in Jenkins
                 publishHTML(target: [
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
@@ -41,12 +43,8 @@ pipeline {
 
     post {
         always {
+            // Archive reports for reference
             archiveArtifacts artifacts: 'reports/*', fingerprint: true
-        }
-        failure {
-            mail to: 'team@example.com',
-                 subject: "API Tests Failed: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
-                 body: "Please check Jenkins build ${env.BUILD_URL}"
         }
     }
 }
