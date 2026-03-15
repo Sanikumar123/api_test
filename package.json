@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Dependencies for Jenkins API test pipeline",
   "dependencies": {
-    "newman": "^6.2.1",
-    "newman-reporter-html": "^5.0.0"
+    "newman": "*",
+    "newman-reporter-html": "*"
   }
 }

@@ -1,22 +1,20 @@
 @echo off
-REM Usage: run_all.bat <env_file>
-
 SET ENV_FILE=%1
 
 IF "%ENV_FILE%"=="" (
     SET ENV_FILE=environments\QA.postman_environment.json
 )
 
-REM Make sure reports directory exists
+REM Ensure reports folder exists
 IF NOT EXIST reports (
     mkdir reports
 )
 
-REM Use local newman from node_modules
+REM Run Newman using local installation
 node_modules\.bin\newman run collections\LibraryCollections.postman_collection.json ^
     -e "%ENV_FILE%" ^
     -r cli,html ^
-    --reporter-html-export "reports\report.html"
+    --reporter-html-export "reports/report.html"
 
 IF %ERRORLEVEL% NEQ 0 (
     echo "Newman tests failed!"
