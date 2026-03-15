@@ -1,19 +1,23 @@
 pipeline {
     agent any
 
-    // Parameter to select Git branch at build time
+    // Build parameters
     parameters {
         string(
             name: 'BRANCH_NAME',
-            defaultValue: 'master',
-            description: 'Enter the Git branch to build'
+            defaultValue: 'master',       // default branch if user does not provide
+            description: 'Enter the Git branch to build (default is master)'
+        )
+        choice(
+            name: 'ENV',
+            choices: ['QA', 'UAT', 'staging', 'prod'],
+            description: 'Select the Postman environment'
         )
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Pull the selected branch from Git
                 git url: 'https://github.com/Sanikumar123/api_test.git',
                     branch: "${params.BRANCH_NAME}"
             }
@@ -21,14 +25,18 @@ pipeline {
 
         stage('Run API Tests') {
             steps {
-                // Run the Windows batch script
-                bat 'scripts\\run_all.bat'
+                script {
+                    // Map ENV choice to actual JSON file
+                    def envFile = "environments/${params.ENV}.postman_environment.json"
+
+                    // Run Newman via Windows batch script
+                    bat "scripts\\run_all.bat ${envFile}"
+                }
             }
         }
 
         stage('Publish HTML Reports') {
             steps {
-                // Publish all Newman HTML reports in Jenkins
                 publishHTML(target: [
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
@@ -43,7 +51,7 @@ pipeline {
 
     post {
         always {
-            // Archive reports for reference
+            // Archive reports for download
             archiveArtifacts artifacts: 'reports/*', fingerprint: true
         }
     }
