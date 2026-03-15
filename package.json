@@ -1,12 +1,8 @@
 {
   "name": "api_test_framework",
   "version": "1.0.0",
-  "description": "Postman API automation framework with Newman and HTMLExtra reports",
-  "scripts": {
-    "test": "newman run collections/*.postman_collection.json -r cli,htmlextra --reporter-htmlextra-export reports/summary_report.html"
-  },
   "devDependencies": {
-    "newman": "^6.2.1",
-    "newman-reporter-htmlextra": "^1.28.0"
+    "newman": "^6.13.1",
+    "newman-reporter-htmlextra": "^1.19.0"
   }
 }
