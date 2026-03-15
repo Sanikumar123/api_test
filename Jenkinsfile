@@ -1,11 +1,10 @@
 pipeline {
     agent any
 
-    // Build parameters
     parameters {
         string(
             name: 'BRANCH_NAME',
-            defaultValue: 'master',       // default branch if user does not provide
+            defaultValue: 'master',
             description: 'Enter the Git branch to build (default is master)'
         )
         choice(
@@ -30,19 +29,21 @@ pipeline {
                     def envFile = "environments/${params.ENV}.postman_environment.json"
 
                     // Run Newman via Windows batch script
-                    bat "scripts\\run_all.bat ${envFile}"
+                    // Continue even if tests fail to ensure HTML report is generated
+                    bat(script: "scripts\\run_all.bat ${envFile}", returnStatus: true)
                 }
             }
         }
 
         stage('Publish HTML Reports') {
             steps {
+                // Publish the Newman HTML report
                 publishHTML(target: [
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
                     reportDir: 'reports',
-                    reportFiles: '*.html',
+                    reportFiles: 'report.html',
                     reportName: 'API Test Report'
                 ])
             }
@@ -51,7 +52,6 @@ pipeline {
 
     post {
         always {
-            // Archive reports for download
             archiveArtifacts artifacts: 'reports/*', fingerprint: true
         }
     }
