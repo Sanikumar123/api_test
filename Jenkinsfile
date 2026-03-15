@@ -37,11 +37,12 @@ pipeline {
             }
         }
 
-        stage('Install Node Dependencies') {
-            steps {
-                bat 'npm install'
-            }
-        }
+    stage('Install Node Dependencies') {
+        steps {
+            // Install Newman and HTMLExtra with legacy peer deps flag
+            bat 'npm install --legacy-peer-deps'
+         }
+      }
 
         stage('Run API Tests') {
             steps {
