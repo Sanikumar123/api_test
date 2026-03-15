@@ -3,14 +3,14 @@ pipeline {
 
     parameters {
         choice(
-            name: 'RUN_MODE',
-            choices: ['Specific Collection', 'All Collections'],
-            description: 'Choose whether to run a specific collection or all collections'
+            name: 'RUN_OPTION',
+            choices: ['All', 'Specific'],
+            description: 'Choose All to run all collections, or Specific to run a single collection'
         )
         string(
-            name: 'COLLECTION',
+            name: 'SPECIFIC_COLLECTION',
             defaultValue: '',
-            description: 'Enter collection file name (without .postman_collection.json) if RUN_MODE is "Specific Collection"'
+            description: 'Enter the collection file name (only if RUN_OPTION is Specific)'
         )
         choice(
             name: 'ENV',
@@ -38,19 +38,20 @@ pipeline {
                 script {
                     def envFile = "environments/${params.ENV}.postman_environment.json"
 
-                    if (params.RUN_MODE == 'Specific Collection') {
-                        if (!params.COLLECTION) {
-                            error "Collection name is required for RUN_MODE = Specific Collection"
+                    if (params.RUN_OPTION == 'All') {
+                        // Loop through all collections in the folder
+                        bat """
+                        for %%f in (collections\\*.postman_collection.json) do (
+                            newman run %%f -e ${envFile} -r cli,html --reporter-html-export reports\\%%~nf_report.html
+                        )
+                        """
+                    } else if (params.RUN_OPTION == 'Specific') {
+                        if (!params.SPECIFIC_COLLECTION) {
+                            error "SPECIFIC_COLLECTION parameter is empty. Please provide a collection name."
                         }
-                        def collFile = "collections/${params.COLLECTION}.postman_collection.json"
-                        bat "newman run ${collFile} -e ${envFile} -r cli,html --reporter-html-export reports/${params.COLLECTION}_report.html"
-                    } else {
-                        // Dynamically list all collection files in the collections folder
-                        def collFiles = bat(script: 'dir /b collections\\*.postman_collection.json', returnStdout: true).trim().split('\r\n')
-                        for (collFile in collFiles) {
-                            def collName = collFile.replace('.postman_collection.json','')
-                            bat "newman run collections\\${collFile} -e ${envFile} -r cli,html --reporter-html-export reports\\${collName}_report.html"
-                        }
+                        bat """
+                        newman run collections\\${params.SPECIFIC_COLLECTION} -e ${envFile} -r cli,html --reporter-html-export reports\\${params.SPECIFIC_COLLECTION}_report.html
+                        """
                     }
                 }
             }
@@ -59,7 +60,7 @@ pipeline {
         stage('Publish HTML Reports') {
             steps {
                 publishHTML(target: [
-                    allowMissing: false,
+                    allowMissing: true,
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
                     reportDir: 'reports',

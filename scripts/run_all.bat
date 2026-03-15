@@ -1,8 +1,9 @@
 @echo off
-REM Usage: run_all.bat <ENV_FILE> [<COLLECTION_NAME>]
+REM Usage: run_all.bat <env_file> <run_option> [specific_collection]
 
 SET ENV_FILE=%1
-SET COLLECTION_NAME=%2
+SET RUN_OPTION=%2
+SET SPECIFIC_COLLECTION=%3
 
 IF "%ENV_FILE%"=="" (
     SET ENV_FILE=environments\QA.postman_environment.json
@@ -13,29 +14,31 @@ IF NOT EXIST reports (
     mkdir reports
 )
 
-IF "%COLLECTION_NAME%"=="" (
-    REM Run all collections
-    FOR %%F IN (collections\*.postman_collection.json) DO (
-        SET COLL_NAME=%%~nF
-        echo Running collection: %%F
-        newman run %%F -e "%ENV_FILE%" -r cli,html --reporter-html-export "reports\%%~nF_report.html"
-        IF ERRORLEVEL 1 (
-            echo "Newman tests failed for %%F!"
-        )
-    )
-) ELSE (
-    REM Run specific collection
-    SET COLL_FILE=collections\%COLLECTION_NAME%.postman_collection.json
-    IF NOT EXIST "%COLL_FILE%" (
-        echo "Collection file %COLL_FILE% not found!"
-        exit /b 1
-    )
-    echo Running specific collection: %COLL_FILE%
-    newman run "%COLL_FILE%" -e "%ENV_FILE%" -r cli,html --reporter-html-export "reports\%COLLECTION_NAME%_report.html"
-    IF ERRORLEVEL 1 (
-        echo "Newman tests failed for %COLLECTION_NAME%!"
-        exit /b 1
-    )
+IF "%RUN_OPTION%"=="" (
+    SET RUN_OPTION=All
 )
 
-echo "All collections executed."
+IF /I "%RUN_OPTION%"=="All" (
+    echo Running all collections in collections folder...
+    for %%f in (collections\*.postman_collection.json) do (
+        echo Running collection: %%~nxf
+        newman run "%%f" -e "%ENV_FILE%" -r cli,html --reporter-html-export "reports\%%~nf_report.html"
+        IF %ERRORLEVEL% NEQ 0 (
+            echo "Newman tests failed for %%~nxf!"
+        )
+    )
+) ELSE IF /I "%RUN_OPTION%"=="Specific" (
+    IF "%SPECIFIC_COLLECTION%"=="" (
+        echo "Error: SPECIFIC_COLLECTION parameter is empty."
+        exit /b 1
+    )
+    echo Running specific collection: %SPECIFIC_COLLECTION%
+    newman run "collections\%SPECIFIC_COLLECTION%" -e "%ENV_FILE%" -r cli,html --reporter-html-export "reports\%SPECIFIC_COLLECTION%_report.html"
+    IF %ERRORLEVEL% NEQ 0 (
+        echo "Newman tests failed for %SPECIFIC_COLLECTION%!"
+        exit /b 1
+    )
+) ELSE (
+    echo "Error: Unknown RUN_OPTION %RUN_OPTION%. Use All or Specific."
+    exit /b 1
+)
