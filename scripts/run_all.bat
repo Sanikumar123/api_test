@@ -12,8 +12,8 @@ IF NOT EXIST reports (
     mkdir reports
 )
 
-REM Run Newman with HTML report
-newman run collections\LibraryCollections.postman_collection.json ^
+REM Use local newman from node_modules
+node_modules\.bin\newman run collections\LibraryCollections.postman_collection.json ^
     -e "%ENV_FILE%" ^
     -r cli,html ^
     --reporter-html-export "reports\report.html"
