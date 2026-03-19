@@ -5,27 +5,27 @@ pipeline {
         choice(
             name: 'RUN_OPTION',
             choices: ['All', 'Specific'],
-            description: 'Choose All to run all collections, or Specific to run a single collection'
+            description: 'Run all collections or a specific one'
         )
         string(
             name: 'SPECIFIC_COLLECTION',
             defaultValue: '',
-            description: 'Enter collection file name if RUN_OPTION is Specific'
+            description: 'Collection name WITHOUT .json (e.g., E2EECom)'
         )
         choice(
             name: 'ENV',
             choices: ['QA', 'UAT', 'staging', 'prod'],
-            description: 'Select Postman environment'
+            description: 'Select environment'
         )
         string(
             name: 'TEST_DATA_FILE',
             defaultValue: '',
-            description: 'Optional: provide CSV file name from test_data folder'
+            description: 'Optional CSV file from test_data folder'
         )
         string(
             name: 'BRANCH_NAME',
             defaultValue: 'master',
-            description: 'Git branch to build'
+            description: 'Git branch'
         )
     }
 
@@ -56,7 +56,7 @@ pipeline {
             steps {
                 script {
                     if (params.RUN_OPTION == 'Specific' && !params.SPECIFIC_COLLECTION) {
-                        error "SPECIFIC_COLLECTION is required when RUN_OPTION=Specific"
+                        error "SPECIFIC_COLLECTION is required"
                     }
                 }
             }
@@ -68,8 +68,8 @@ pipeline {
                     def envFile = "environments/${params.ENV}.postman_environment.json"
                     def testDataArg = params.TEST_DATA_FILE ? params.TEST_DATA_FILE : ""
 
-                    echo "Running tests with ENV: ${params.ENV}"
-                    echo "Using env file: ${envFile}"
+                    echo "ENV: ${params.ENV}"
+                    echo "RUN_OPTION: ${params.RUN_OPTION}"
 
                     if (params.RUN_OPTION == 'All') {
                         bat "scripts\\run_all.bat ${envFile} All \"\" ${testDataArg}"
@@ -88,7 +88,7 @@ pipeline {
                     keepAll: true,
                     reportDir: 'reports',
                     reportFiles: '*.html',
-                    reportName: 'API Test Reports (HTMLExtra)'
+                    reportName: 'API Test Reports'
                 ])
             }
         }
@@ -99,10 +99,10 @@ pipeline {
             archiveArtifacts artifacts: 'reports/*', fingerprint: true
         }
         success {
-            echo 'API Tests Passed ✅'
+            echo '✅ API Tests Passed'
         }
         failure {
-            echo 'API Tests Failed ❌'
+            echo '❌ API Tests Failed'
         }
     }
 }
