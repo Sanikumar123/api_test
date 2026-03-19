@@ -30,6 +30,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git url: 'https://github.com/Sanikumar123/api_test.git',
@@ -37,26 +38,42 @@ pipeline {
             }
         }
 
-    stage('Install Node Dependencies') {
-        steps {
-            // Install Newman and HTMLExtra with legacy peer deps flag
-            bat 'npm install --legacy-peer-deps'
-         }
-      }
+        stage('Install Newman') {
+            steps {
+                bat '''
+                echo Installing Newman...
+                npm install -g newman
+
+                echo Installing HTML Reporter...
+                npm install -g newman-reporter-htmlextra
+
+                newman -v
+                '''
+            }
+        }
+
+        stage('Validate Inputs') {
+            steps {
+                script {
+                    if (params.RUN_OPTION == 'Specific' && !params.SPECIFIC_COLLECTION) {
+                        error "SPECIFIC_COLLECTION is required when RUN_OPTION=Specific"
+                    }
+                }
+            }
+        }
 
         stage('Run API Tests') {
             steps {
                 script {
                     def envFile = "environments/${params.ENV}.postman_environment.json"
-
                     def testDataArg = params.TEST_DATA_FILE ? params.TEST_DATA_FILE : ""
+
+                    echo "Running tests with ENV: ${params.ENV}"
+                    echo "Using env file: ${envFile}"
 
                     if (params.RUN_OPTION == 'All') {
                         bat "scripts\\run_all.bat ${envFile} All \"\" ${testDataArg}"
-                    } else if (params.RUN_OPTION == 'Specific') {
-                        if (!params.SPECIFIC_COLLECTION) {
-                            error "SPECIFIC_COLLECTION is required for Specific option"
-                        }
+                    } else {
                         bat "scripts\\run_all.bat ${envFile} Specific ${params.SPECIFIC_COLLECTION} ${testDataArg}"
                     }
                 }
@@ -80,6 +97,12 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'reports/*', fingerprint: true
+        }
+        success {
+            echo 'API Tests Passed ✅'
+        }
+        failure {
+            echo 'API Tests Failed ❌'
         }
     }
 }
