@@ -48,15 +48,14 @@ pipeline {
                 script {
                     def envFile = "environments/${params.ENV}.postman_environment.json"
                     def testDataArg = params.TEST_DATA_FILE ? params.TEST_DATA_FILE : ""
+                    def collectionArg = params.RUN_OPTION == 'Specific' ? params.SPECIFIC_COLLECTION : ""
 
-                    if (params.RUN_OPTION == 'All') {
-                        bat "scripts\\run_all.bat ${envFile} All \"\" ${testDataArg}"
-                    } else if (params.RUN_OPTION == 'Specific') {
-                        if (!params.SPECIFIC_COLLECTION) {
-                            error "SPECIFIC_COLLECTION is required for Specific option"
-                        }
-                        bat "scripts\\run_all.bat ${envFile} Specific ${params.SPECIFIC_COLLECTION} ${testDataArg}"
+                    if (params.RUN_OPTION == 'Specific' && !params.SPECIFIC_COLLECTION) {
+                        error "SPECIFIC_COLLECTION is required for Specific option"
                     }
+
+                    // Windows-safe bat command with quotes
+                    bat "\"scripts\\run_all.bat\" \"${envFile}\" \"${params.RUN_OPTION}\" \"${collectionArg}\" \"${testDataArg}\""
                 }
             }
         }

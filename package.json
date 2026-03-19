@@ -1,8 +1,12 @@
 {
-  "name": "api_test_framework",
+  "name": "api-test",
   "version": "1.0.0",
-  "devDependencies": {
-    "newman": "^6.13.1",
-    "newman-reporter-htmlextra": "^1.19.0"
+  "description": "Postman API tests executed via Newman",
+  "scripts": {
+    "test": "node run_all.js"
+  },
+  "dependencies": {
+    "newman": "latest",
+    "newman-reporter-htmlextra": "latest"
   }
 }

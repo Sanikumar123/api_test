@@ -1,5 +1,7 @@
 @echo off
-REM Usage: run_all.bat <env_file> <run_option> [specific_collection] [test_data_file]
+REM ================================
+REM Batch script to run Newman collections
+REM ================================
 
 SET ENV_FILE=%1
 SET RUN_OPTION=%2
@@ -13,44 +15,19 @@ echo SPECIFIC_COLLECTION: %SPECIFIC_COLLECTION%
 echo TEST_DATA_FILE: %TEST_DATA_FILE%
 echo =====================================
 
-REM Default ENV_FILE
-IF "%ENV_FILE%"=="" (
-    SET ENV_FILE=environments\QA.postman_environment.json
+REM Run Newman with htmlextra reporter
+REM Output HTML report into ./reports folder with timestamp
+
+SET REPORTS_DIR=reports
+IF NOT EXIST %REPORTS_DIR% (
+    mkdir %REPORTS_DIR%
 )
 
-REM Create reports folder if not exist
-IF NOT EXIST reports (
-    mkdir reports
-)
+SET TIMESTAMP=%DATE:~-4%%DATE:~4,2%%DATE:~7,2%_%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%
+SET TIMESTAMP=%TIMESTAMP: =0%
 
-REM Default RUN_OPTION
-IF "%RUN_OPTION%"=="" (
-    SET RUN_OPTION=All
-)
-
-REM Run Newman command
-IF /I "%RUN_OPTION%"=="All" (
-    echo Running all collections in collections folder...
-    for %%f in (collections\*.postman_collection.json) do (
-        echo Running collection: %%~nxf
-        IF "%TEST_DATA_FILE%"=="" (
-            newman run "%%f" -e "%ENV_FILE%" -r htmlextra --reporter-htmlextra-export "reports\%%~nf_report.html" --suppress-exit-code
-        ) ELSE (
-            newman run "%%f" -e "%ENV_FILE%" -d "test_data\%TEST_DATA_FILE%" -r htmlextra --reporter-htmlextra-export "reports\%%~nf_report.html" --suppress-exit-code
-        )
-    )
-) ELSE IF /I "%RUN_OPTION%"=="Specific" (
-    IF "%SPECIFIC_COLLECTION%"=="" (
-        echo "Error: SPECIFIC_COLLECTION parameter is empty."
-        exit /b 1
-    )
-    echo Running specific collection: collections\%SPECIFIC_COLLECTION%.postman_collection.json
-    IF "%TEST_DATA_FILE%"=="" (
-        newman run "collections\%SPECIFIC_COLLECTION%.postman_collection.json" -e "%ENV_FILE%" -r htmlextra --reporter-htmlextra-export "reports\%SPECIFIC_COLLECTION%_report.html" --suppress-exit-code
-    ) ELSE (
-        newman run "collections\%SPECIFIC_COLLECTION%.postman_collection.json" -e "%ENV_FILE%" -d "test_data\%TEST_DATA_FILE%" -r htmlextra --reporter-htmlextra-export "reports\%SPECIFIC_COLLECTION%_report.html" --suppress-exit-code
-    )
+IF "%RUN_OPTION%"=="Specific" (
+    newman run collections/%SPECIFIC_COLLECTION%.postman_collection.json -e %ENV_FILE% -r htmlextra --reporter-htmlextra-export "%REPORTS_DIR%/%SPECIFIC_COLLECTION%_%TIMESTAMP%.html" --bail-exit-code 0
 ) ELSE (
-    echo "Error: Unknown RUN_OPTION %RUN_OPTION%. Use All or Specific."
-    exit /b 1
+    newman run collections/*.postman_collection.json -e %ENV_FILE% -r htmlextra --reporter-htmlextra-export "%REPORTS_DIR%/AllCollections_%TIMESTAMP%.html" --bail-exit-code 0
 )
