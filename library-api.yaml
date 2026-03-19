@@ -1,0 +1,46 @@
+openapi: 3.0.0
+info:
+  title: Library API
+  version: 1.0.0
+  description: Contract for Add Book API
+
+servers:
+  - url: https://rahulshettyacademy.com
+
+paths:
+  /Library/Addbook.php:
+    post:
+      summary: Add a book
+      operationId: addBook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - isbn
+                - aisle
+                - author
+              properties:
+                name:
+                  type: string
+                isbn:
+                  type: string
+                aisle:
+                  type: string
+                author:
+                  type: string
+      responses:
+        "200":
+          description: Book successfully added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Msg:
+                    type: string
+                  ID:
+                    type: string

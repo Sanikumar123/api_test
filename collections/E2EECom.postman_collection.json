@@ -1,0 +1,291 @@
+{
+  "info": {
+    "_postman_id": "0e2c2970-9539-45f2-8616-4d0ef31a9a32",
+    "name": "E2EECom",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "32918040"
+  },
+  "item": [
+    {
+      "name": "Login success",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();\r",
+              "\r",
+              "pm.environment.set(\"token\",res.token);\r",
+              "pm.environment.set(\"userId\",res.userId);\r",
+              "\r",
+              "//Status code\r",
+              "pm.test(\"Validate status code\",function(){\r",
+              "\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "//Success message\r",
+              "pm.test(\"Validate success message\", function(){\r",
+              "\r",
+              "    pm.expect(res.message).to.be.eql(\"Login Successfully\");\r",
+              "\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userEmail\": \"{{username}}\",\r\n    \"userPassword\": \"{{password}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{ecom_base_url}}/login",
+          "host": [
+            "{{ecom_base_url}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "contract success",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();\r",
+              "\r",
+              "const req = JSON.parse(pm.request.body.raw);\r",
+              "\r",
+              "//response validations\r",
+              "\r",
+              "pm.test(\"Validate token field\", function () {\r",
+              "\r",
+              "    pm.expect(res).to.have.property(\"token\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Validate userId field\", function () {\r",
+              "\r",
+              "    pm.expect(res).to.have.property(\"userId\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Validate message field\", function () {\r",
+              "\r",
+              "    pm.expect(res).to.have.property(\"message\");\r",
+              "});\r",
+              "\r",
+              "//request body validations\r",
+              "pm.test(\"Validate userEmail field\", function () {\r",
+              "\r",
+              "    pm.expect(req).to.have.property(\"userEmail\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Validate userPassword field\", function () {\r",
+              "\r",
+              "    pm.expect(req).to.have.property(\"userPassword\");\r",
+              "});\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userEmail\": \"{{username}}\",\r\n    \"userPassword\": \"{{password}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{ecom_base_url}}/login",
+          "host": [
+            "{{ecom_base_url}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login failure",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json()\r",
+              "\r",
+              "\r",
+              "pm.test(\"valid status code as 400\", function(){\r",
+              "\r",
+              "    pm.response.to.have.status(400);\r",
+              "\r",
+              "});\r",
+              "\r",
+              "pm.test(\"valid message\", function(){\r",
+              "\r",
+              "    pm.expect(res.message).to.be.eql(\"Incorrect email or password.\");\r",
+              "\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userEmail\": \"{{invalid_username}}\",\r\n    \"userPassword\": \"{{password}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{ecom_base_url}}/login",
+          "host": [
+            "{{ecom_base_url}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "contract failure",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();\r",
+              "\r",
+              "const req = JSON.parse(pm.request.body.raw);\r",
+              "\r",
+              "//response validations\r",
+              "\r",
+              "pm.test(\"Validate token field not pesent\", function () {\r",
+              "\r",
+              "    pm.expect(res).to.not.have.property(\"token\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Validate userId field not pesent\", function () {\r",
+              "\r",
+              "    pm.expect(res).to.not.have.property(\"userId\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Validate message field pesent\", function () {\r",
+              "\r",
+              "    pm.expect(res).to.have.property(\"message\");\r",
+              "});\r",
+              "\r",
+              "//request body validations\r",
+              "pm.test(\"Validate userEmail field\", function () {\r",
+              "\r",
+              "    pm.expect(req).to.have.property(\"userEmail\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Validate userPassword field\", function () {\r",
+              "\r",
+              "    pm.expect(req).to.have.property(\"userPassword\");\r",
+              "});\r",
+              "\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userEmail\": \"{{invalid_username}}\",\r\n    \"userPassword\": \"{{password}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{ecom_base_url}}/login",
+          "host": [
+            "{{ecom_base_url}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "ecom_base_url",
+      "value": ""
+    }
+  ]
+}
