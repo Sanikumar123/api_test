@@ -104,8 +104,13 @@
           "listen": "test",
           "script": {
             "exec": [
-              "const jsonData = pm.response.json();\r",
+              "let utils = eval(pm.collectionVariables.get(\"utils\"));\r",
               "\r",
+              "utils.validateStatus(200);\r",
+              "utils.validateResponseTime(2000);\r",
+              "utils.validateHeader(\"Content-Type\");\r",
+              "\r",
+              "const jsonData = pm.response.json();\r",
               "\r",
               "pm.test(\"validate isbn value\", function () {\r",
               "\r",
@@ -135,11 +140,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://rahulshettyacademy.com/Library/GetBook.php?ID={{ID}}",
-          "protocol": "https",
+          "raw": "{{base_url}}/Library/GetBook.php?ID={{ID}}",
           "host": [
-            "rahulshettyacademy",
-            "com"
+            "{{base_url}}"
           ],
           "path": [
             "Library",
@@ -150,6 +153,33 @@
               "key": "ID",
               "value": "{{ID}}"
             }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AddbookCSV",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\": \"{{name}}\",\r\n    \"isbn\": \"{{isbn}}\",\r\n    \"aisle\": \"{{isle}}\",\r\n    \"author\": \"{{author}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/Library/Addbook.php",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "Library",
+            "Addbook.php"
           ]
         }
       },
@@ -175,7 +205,25 @@
         "packages": {},
         "requests": {},
         "exec": [
-          ""
+          "({\r",
+          "    validateStatus: function(code){\r",
+          "        pm.test(\"Status code is \" + code, function () {\r",
+          "            pm.response.to.have.status(code);\r",
+          "        });\r",
+          "    },\r",
+          "\r",
+          "    validateResponseTime: function(limit){\r",
+          "        pm.test(\"Response time < \" + limit, function () {\r",
+          "            pm.expect(pm.response.responseTime).to.be.below(limit);\r",
+          "        });\r",
+          "    },\r",
+          "\r",
+          "    validateHeader: function(header){\r",
+          "        pm.test(\"Validate header \" + header, function () {\r",
+          "            pm.expect(pm.response.headers.get(header)).to.exist;\r",
+          "        });\r",
+          "    }\r",
+          "})"
         ]
       }
     }
@@ -199,6 +247,10 @@
     },
     {
       "key": "author",
+      "value": ""
+    },
+    {
+      "key": "utils",
       "value": ""
     }
   ]

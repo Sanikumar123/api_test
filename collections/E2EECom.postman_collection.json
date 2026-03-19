@@ -281,11 +281,5 @@
         ]
       }
     }
-  ],
-  "variable": [
-    {
-      "key": "ecom_base_url",
-      "value": ""
-    }
   ]
 }
